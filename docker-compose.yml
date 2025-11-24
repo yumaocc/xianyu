@@ -3,6 +3,7 @@ version: '3.8'
 services:
   # Python 后端服务（包含 API 和 Agent）
   xianyu-backend:
+    build: ./XianyuAutoAgent
     image: xianyu-backend:latest
     container_name: xianyu-backend
     restart: unless-stopped
@@ -28,6 +29,7 @@ services:
 
   # React 前端 (Nginx)
   xianyu-admin:
+    build: ./xianyu-admin-web
     image: xianyu-xianyu-admin:latest
     container_name: xianyu-admin
     restart: unless-stopped
