@@ -1,0 +1,62 @@
+========================================
+腾讯云服务器部署命令（按顺序执行）
+========================================
+
+# 1. 进入临时目录
+cd /tmp
+
+# 2. 下载部署包（需要先上传到服务器）
+# 方法A：如果你能访问文件上传功能，上传 xianyu-deploy.tar.gz 到 /tmp/
+
+# 方法B：如果本地能访问服务器（使用下面的命令在本地执行）
+# 从本地上传文件（需要解决 SSH 问题后才能用）
+# scp /Users/q/Desktop/xianyu/xianyu-deploy.tar.gz root@43.138.159.209:/tmp/
+
+# 3. 解压部署包
+cd /tmp
+tar -xzf xianyu-deploy.tar.gz
+
+# 4. 进入解压后的目录
+cd export
+
+# 5. 给部署脚本添加执行权限
+chmod +x deploy-server.sh
+
+# 6. 执行部署脚本
+./deploy-server.sh
+
+# 7. 查看服务状态
+docker-compose ps
+
+# 8. 查看后端日志（确认启动成功）
+docker-compose logs -f xianyu-backend
+
+========================================
+如果需要重新部署，执行以下命令：
+========================================
+
+cd /tmp/export
+
+# 停止服务
+docker-compose down
+
+# 重新加载镜像
+docker load < xianyu-backend.tar.gz
+docker load < xianyu-admin.tar.gz
+
+# 启动服务
+docker-compose up -d
+
+# 查看日志
+docker-compose logs -f
+
+========================================
+测试修复是否成功：
+========================================
+
+# 在终端执行
+curl -X POST http://localhost/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"admin","password":"123456"}'
+
+# 应该返回成功的 JSON 响应，包含 token 和用户信息

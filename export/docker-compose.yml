@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  # Python 后端服务（包含 API 和 Agent）
+  xianyu-backend:
+    image: xianyu-backend:latest
+    container_name: xianyu-backend
+    restart: unless-stopped
+    ports:
+      - "5000:5000"  # Web API 端口
+    volumes:
+      - ./data:/app/data
+      - ./prompts:/app/prompts
+      - ./.env:/app/.env
+    environment:
+      - TZ=Asia/Shanghai
+      - PYTHONUNBUFFERED=1
+      - FLASK_ENV=production
+      - AUTO_START_AGENT=true  # 自动启动 Agent
+    networks:
+      - xianyu-network
+    command: ["python", "start_web.py"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/api/system/status')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # React 前端 (Nginx)
+  xianyu-admin:
+    image: xianyu-xianyu-admin:latest
+    container_name: xianyu-admin
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    networks:
+      - xianyu-network
+    depends_on:
+      - xianyu-backend
+
+networks:
+  xianyu-network:
+    driver: bridge

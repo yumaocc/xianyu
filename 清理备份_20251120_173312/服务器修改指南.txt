@@ -1,0 +1,73 @@
+========================================
+服务器端修改 web_api.py 指南
+========================================
+
+在腾讯云 Web 终端执行：
+
+# 1. 找到项目目录
+cd /root  # 或其他你的项目所在目录
+
+# 2. 编辑 web_api.py 文件
+vi XianyuAutoAgent/web_api.py
+
+# 3. 在 vi 编辑器中：
+#    - 按 / 键进入搜索模式
+#    - 输入: 静态文件服务
+#    - 按回车找到这一行
+#    - 按 dd 删除当前行（删除 3 行）
+
+# 4. 找到需要添加新代码的位置
+#    - 继续按 / 搜索: # 日志接口
+#    - 按 o 键在下一行插入
+
+# 5. 复制粘贴以下内容：
+
+        # 健康检查接口
+        self.app.route('/health', methods=['GET'])(self.health_check)
+
+        # 根路径接口
+        self.app.route('/', methods=['GET'])(self.index)
+
+# 6. 按 ESC 退出插入模式
+# 7. 输入 :wq 保存并退出
+
+# 8. 找到文件末尾的 serve_static 函数并替换
+#    - 按 / 搜索: def serve_static
+#    - 删除这个函数的所有内容（约10行）
+#    - 按 o 插入以下内容：
+
+    def health_check(self):
+        """健康检查接口"""
+        return jsonify({
+            'status': 'success',
+            'message': 'API server is running',
+            'timestamp': time.time()
+        })
+
+    def index(self):
+        """根路径接口"""
+        return jsonify({
+            'status': 'success',
+            'message': 'XianyuAutoAgent API Server',
+            'version': '2.0',
+            'docs': '/api'
+        })
+
+# 9. 保存退出（ESC 然后 :wq）
+
+# 10. 重新构建和部署
+cd /root  # 回到项目根目录
+docker-compose down
+cd XianyuAutoAgent
+docker build -t xianyu-backend:latest .
+cd ..
+docker-compose up -d
+
+# 11. 测试
+curl -X POST http://localhost/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"admin","password":"123456"}'
+
+========================================
+如果不熟悉 vi 编辑器，用方式 B
+========================================
